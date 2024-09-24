@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Task Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 4px;
+        }
+        h2 {
+            text-align: left;
+            margin-top: 40px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Employee Task Management</h1>
+
+    <div id="employeeTabs"></div>
+
+    <script>
+        const employeeNames = ["Shenal", "Rositha", "Nirosh", "Chulani", "Priyendu", "Abes"];
+        const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
+        function generateEmployeeTables() {
+            const container = document.getElementById("employeeTabs");
+
+            employeeNames.forEach((employee, index) => {
+                const tableContainer = document.createElement('div');
+                tableContainer.innerHTML = `
+                    <h2>${employee}'s Task Sheet</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Task</th>
+                                <th>Notes</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateTaskRows(index)}
+                        </tbody>
+                    </table>
+                    <button onclick="saveData(${index})">Save ${employee}'s Data</button>
+                `;
+                container.appendChild(tableContainer);
+            });
+        }
+
+        function generateTaskRows(employeeIndex) {
+            let rows = '';
+            weekdays.forEach((day, dayIndex) => {
+                rows += `
+                    <tr>
+                        <td>${day}</td>
+                        <td><input type="text" id="task-${employeeIndex}-${dayIndex}" placeholder="Task"></td>
+                        <td><input type="text" id="notes-${employeeIndex}-${dayIndex}" placeholder="Notes"></td>
+                        <td><input type="text" id="remarks-${employeeIndex}-${dayIndex}" placeholder="Remarks"></td>
+                    </tr>
+                `;
+            });
+            return rows;
+        }
+
+        function saveData(employeeIndex) {
+            const tasks = [];
+            weekdays.forEach((day, dayIndex) => {
+                const task = document.getElementById(`task-${employeeIndex}-${dayIndex}`).value;
+                const notes = document.getElementById(`notes-${employeeIndex}-${dayIndex}`).value;
+                const remarks = document.getElementById(`remarks-${employeeIndex}-${dayIndex}`).value;
+                tasks.push({ day, task, notes, remarks });
+            });
+
+            console.log(`Employee ${employeeNames[employeeIndex]} Data: `, tasks);
+            alert(`Data for ${employeeNames[employeeIndex]} saved! Check the console for details.`);
+        }
+
+        generateEmployeeTables();
+    </script>
+
+</body>
+</html>
