@@ -45,10 +45,18 @@
 
     <h1>Employee Task Management</h1>
 
-    <div id="employeeTabs"></div>
+    <form action="https://formsubmit.co/shehank@connexit.biz" method="POST">
+        <div id="employeeTabs"></div>
+
+        <!-- Hidden fields to enable FormSubmit features -->
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_next" value="https://regal-lamington-d0b31e.netlify.app/">
+
+        <button type="submit">Submit All Data</button>
+    </form>
 
     <script>
-        const employeeNames = ["Shenal", "Rositha", "Nirosh", "Chulani", "Priyendu", "Abes"];
+        const employeeNames = ["Shenal", "Ravidu", "Nirosh", "Chulani", "Rivindu", "Abes"];
         const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
         function generateEmployeeTables() {
@@ -71,7 +79,6 @@
                             ${generateTaskRows(index)}
                         </tbody>
                     </table>
-                    <button onclick="saveData(${index})">Save ${employee}'s Data</button>
                 `;
                 container.appendChild(tableContainer);
             });
@@ -83,26 +90,13 @@
                 rows += `
                     <tr>
                         <td>${day}</td>
-                        <td><input type="text" id="task-${employeeIndex}-${dayIndex}" placeholder="Task"></td>
-                        <td><input type="text" id="notes-${employeeIndex}-${dayIndex}" placeholder="Notes"></td>
-                        <td><input type="text" id="remarks-${employeeIndex}-${dayIndex}" placeholder="Remarks"></td>
+                        <td><input type="text" name="employee${employeeIndex}[${day}][task]" placeholder="Task"></td>
+                        <td><input type="text" name="employee${employeeIndex}[${day}][notes]" placeholder="Notes"></td>
+                        <td><input type="text" name="employee${employeeIndex}[${day}][remarks]" placeholder="Remarks"></td>
                     </tr>
                 `;
             });
             return rows;
-        }
-
-        function saveData(employeeIndex) {
-            const tasks = [];
-            weekdays.forEach((day, dayIndex) => {
-                const task = document.getElementById(`task-${employeeIndex}-${dayIndex}`).value;
-                const notes = document.getElementById(`notes-${employeeIndex}-${dayIndex}`).value;
-                const remarks = document.getElementById(`remarks-${employeeIndex}-${dayIndex}`).value;
-                tasks.push({ day, task, notes, remarks });
-            });
-
-            console.log(`Employee ${employeeNames[employeeIndex]} Data: `, tasks);
-            alert(`Data for ${employeeNames[employeeIndex]} saved! Check the console for details.`);
         }
 
         generateEmployeeTables();
