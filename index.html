@@ -22,7 +22,7 @@
         th {
             background-color: #f2f2f2;
         }
-        input[type="text"] {
+        input[type="text"], input[type="date"] {
             width: 100%;
             padding: 4px;
         }
@@ -32,12 +32,16 @@
         }
         button {
             padding: 10px 20px;
-            margin-top: 20px;
+            margin-top: 10px;
+            margin-right: 10px;
             cursor: pointer;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
+        }
+        form {
+            margin-bottom: 40px;
         }
     </style>
 </head>
@@ -45,15 +49,7 @@
 
     <h1>Employee Task Management</h1>
 
-    <form action="https://formsubmit.co/shehank@connexit.biz" method="POST">
-        <div id="employeeTabs"></div>
-
-        <!-- Hidden fields to enable FormSubmit features -->
-        <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="_next" value="https://regal-lamington-d0b31e.netlify.app/">
-
-        <button type="submit">Submit All Data</button>
-    </form>
+    <div id="employeeTabs"></div>
 
     <script>
         const employeeNames = ["Shenal", "Ravidu", "Nirosh", "Chulani", "Rivindu", "Abes"];
@@ -62,41 +58,94 @@
         function generateEmployeeTables() {
             const container = document.getElementById("employeeTabs");
 
-            employeeNames.forEach((employee, index) => {
+            employeeNames.forEach((employee, employeeIndex) => {
                 const tableContainer = document.createElement('div');
                 tableContainer.innerHTML = `
-                    <h2>${employee}'s Task Sheet</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Day</th>
-                                <th>Task</th>
-                                <th>Notes</th>
-                                <th>Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${generateTaskRows(index)}
-                        </tbody>
-                    </table>
+                    <form action="https://formsubmit.co/shehank@connexit.biz" method="POST" id="form-${employeeIndex}">
+                        <h2>${employee}'s Task Sheet</h2>
+                        <label for="week-${employeeIndex}">Select Start of Week (Monday):</label>
+                        <input type="date" id="week-${employeeIndex}" name="employee${employeeIndex}[week_start]" required onchange="setWeekEnd(${employeeIndex})">
+                        <label for="week-end-${employeeIndex}">End of Week (Friday):</label>
+                        <input type="date" id="week-end-${employeeIndex}" name="employee${employeeIndex}[week_end]" readonly>
+                        <table id="table-${employeeIndex}">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Task</th>
+                                    <th>Notes</th>
+                                    <th>Remarks</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="task-rows-${employeeIndex}">
+                                ${generateInitialTaskRows(employeeIndex)}
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="_captcha" value="false">
+                        <input type="hidden" name="_next" value="https://regal-lamington-d0b31e.netlify.app/">
+                        <button type="submit">Submit ${employee}'s Data</button>
+                    </form>
                 `;
                 container.appendChild(tableContainer);
             });
         }
 
-        function generateTaskRows(employeeIndex) {
+        // Set the Friday date based on the selected Monday
+        function setWeekEnd(employeeIndex) {
+            const startOfWeekInput = document.getElementById(`week-${employeeIndex}`);
+            const endOfWeekInput = document.getElementById(`week-end-${employeeIndex}`);
+            const mondayDate = new Date(startOfWeekInput.value);
+
+            if (mondayDate.getDay() === 1) {
+                const fridayDate = new Date(mondayDate);
+                fridayDate.setDate(mondayDate.getDate() + 4); // Add 4 days to get to Friday
+
+                // Format the Friday date in YYYY-MM-DD format
+                const formattedFriday = fridayDate.toISOString().split('T')[0];
+                endOfWeekInput.value = formattedFriday;
+            } else {
+                alert("Please select a Monday.");
+                startOfWeekInput.value = "";
+                endOfWeekInput.value = "";
+            }
+        }
+
+        function generateInitialTaskRows(employeeIndex) {
             let rows = '';
             weekdays.forEach((day, dayIndex) => {
                 rows += `
-                    <tr>
+                    <tr id="row-${employeeIndex}-${dayIndex}-0">
                         <td>${day}</td>
-                        <td><input type="text" name="employee${employeeIndex}[${day}][task]" placeholder="Task"></td>
-                        <td><input type="text" name="employee${employeeIndex}[${day}][notes]" placeholder="Notes"></td>
-                        <td><input type="text" name="employee${employeeIndex}[${day}][remarks]" placeholder="Remarks"></td>
+                        <td id="task-col-${employeeIndex}-${dayIndex}">
+                            <input type="text" name="employee${employeeIndex}[${day}][task][]" placeholder="Task">
+                        </td>
+                        <td id="notes-col-${employeeIndex}-${dayIndex}">
+                            <input type="text" name="employee${employeeIndex}[${day}][notes][]" placeholder="Notes">
+                        </td>
+                        <td id="remarks-col-${employeeIndex}-${dayIndex}">
+                            <input type="text" name="employee${employeeIndex}[${day}][remarks][]" placeholder="Remarks">
+                        </td>
+                        <td><button type="button" onclick="addTaskRow('${employeeIndex}', '${dayIndex}')">Add Task</button></td>
                     </tr>
                 `;
             });
             return rows;
+        }
+
+        function addTaskRow(employeeIndex, dayIndex) {
+            const taskCol = document.getElementById(`task-col-${employeeIndex}-${dayIndex}`);
+            const notesCol = document.getElementById(`notes-col-${employeeIndex}-${dayIndex}`);
+            const remarksCol = document.getElementById(`remarks-col-${employeeIndex}-${dayIndex}`);
+            
+            // Create additional input fields for Task, Notes, and Remarks for the same day
+            const newTaskInput = `<input type="text" name="employee${employeeIndex}[${weekdays[dayIndex]}][task][]" placeholder="Task">`;
+            const newNotesInput = `<input type="text" name="employee${employeeIndex}[${weekdays[dayIndex]}][notes][]" placeholder="Notes">`;
+            const newRemarksInput = `<input type="text" name="employee${employeeIndex}[${weekdays[dayIndex]}][remarks][]" placeholder="Remarks">`;
+
+            // Insert the new input fields into the corresponding columns for Task, Notes, and Remarks
+            taskCol.insertAdjacentHTML('beforeend', newTaskInput);
+            notesCol.insertAdjacentHTML('beforeend', newNotesInput);
+            remarksCol.insertAdjacentHTML('beforeend', newRemarksInput);
         }
 
         generateEmployeeTables();
